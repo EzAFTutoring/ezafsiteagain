@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PDF Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Minimal styling for the viewer area and controls -->
+  <style>
+    :root { --bg:#1e1f24; --panel:#2b2f37; --ink:#e9ecf1; --muted:#aab0bc; }
+    * { box-sizing: border-box; }
+    html,body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--ink);
+      font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      background: var(--panel);
+      border-bottom: 1px solid #000;
+    }
+    .toolbar .spacer { flex: 1; }
+    .toolbar button, .toolbar input, .toolbar select {
+      background: #1f2229;
+      color: var(--ink);
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 6px 10px;
+    }
+    .toolbar input[type="number"] { width: 4.5rem; }
+    #viewer {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      padding: 18px;
+      background: linear-gradient(#1e1f24, #1e1f24) padding-box,
+                 repeating-linear-gradient(0deg, #2e313a 0 1px, transparent 1px 80px),
+                 repeating-linear-gradient(90deg, #2e313a 0 1px, transparent 1px 80px);
+    }
+    canvas {
+      background: #2b2e36;
+      border-radius: 8px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.6);
+    }
+    .label { color: var(--muted); }
+    .err { color: #ffb4b4; padding: 10px 14px; }
+  </style>
+
+  <!-- PDF.js via CDN: import module and worker; no local build required -->
+  <script type="module">
+    import * as pdfjs from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.mjs";
+    pdfjs.GlobalWorkerOptions.workerSrc =
+      "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.mjs";
+
+    const qs = (key, def = '') => new URL(location.href).searchParams.get(key) ?? def;
+
+    // Build toolbar controls
+    const bar = document.createElement('div'); bar.className = 'toolbar';
+    const prev = document.createElement('button'); prev.textContent = '← Prev';
+    const next = document.createElement('button'); next.textContent = 'Next →';
+    const pageInput = document.createElement('input'); pageInput.type = 'number'; pageInput.min = '1'; pageInput.value = '1';
+    const totalPages = document.createElement('span'); totalPages.className = 'label'; totalPages.textContent = '/ ?';
+    const spacer = document.createElement('div'); spacer.className = 'spacer';
+    const zoomOut = document.createElement('button'); zoomOut.textContent = '−';
+    const zoomIn  = document.createElement('button'); zoomIn.textContent  = '+';
+    const fitSel  = document.createElement('select');
+    fitSel.innerHTML = `
+      <option value="page-width" selected>Fit width</option>
+      <option value="auto">Auto</option>
+      <option value="100">100%</option>
+      <option value="150">150%</option>
+      <option value="200">200%</option>
+    `;
+    bar.append(prev, next, pageInput, totalPages, spacer, zoomOut, zoomIn, fitSel);
+    document.addEventListener('DOMContentLoaded', () => document.body.prepend(bar));
+
+    const viewer = document.createElement('div'); viewer.id = 'viewer';
+    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+    viewer.appendChild(canvas);
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(viewer));
+
+    let pdfDoc = null;
+    let currentPage = 1;
+    let scale = 1.25;
+    let fitMode = 'page-width';
+
+    function fileParam() {
+      const f = qs('file', '');
+      if (!f) return '';
+      try {
+        const dec = decodeURIComponent(f);
+        return dec || f;
+      } catch { return f; }
+    }
+
+    async function renderPage() {
+      const page = await pdfDoc.getPage(currentPage);
+      let viewport = page.getViewport({ scale });
+      if (fitMode === 'page-width') {
+        const avail = Math.min(viewer.clientWidth, window.innerWidth) - 36;
+        const newScale = Math.max(0.2, Math.min(6, avail / viewport.width));
+        viewport = page.getViewport({ scale: newScale });
+      } else if (!isNaN(+fitMode)) {
+        viewport = page.getViewport({ scale: +fitMode / 100 });
+      }
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      await page.render({ canvasContext: ctx, viewport }).promise;
+      pageInput.value = String(currentPage);
+      totalPages.textContent = `/ ${pdfDoc.numPages}`;
+      prev.disabled = currentPage <= 1;
+      next.disabled = currentPage >= pdfDoc.numPages;
+    }
+
+    async function loadDocument() {
+      const url = fileParam();
+      if (!url) {
+        viewer.innerHTML = '<div class="err">Missing ?file= URL.</div>';
+        return;
+      }
+      try {
+        const task = pdfjs.getDocument(url);
+        pdfDoc = await task.promise;
+        if (currentPage > pdfDoc.numPages) currentPage = 1;
+        await renderPage();
+      } catch (err) {
+        console.error(err);
+        viewer.innerHTML = '<div class="err">Could not load PDF at <code>' + url + '</code>.' +
+          ' Verify the file exists and the path is correct.</div>';
+      }
+    }
+
+    // Event handlers
+    prev.addEventListener('click', async () => { if (currentPage > 1) { currentPage--; await renderPage(); } });
+    next.addEventListener('click', async () => { if (currentPage < pdfDoc.numPages) { currentPage++; await renderPage(); } });
+    pageInput.addEventListener('change', async () => {
+      const n = parseInt(pageInput.value || '1', 10);
+      currentPage = Math.max(1, Math.min(pdfDoc.numPages, n));
+      await renderPage();
+    });
+    zoomIn.addEventListener('click', async () => { fitMode = 'manual'; scale = Math.min(6, scale * 1.2); await renderPage(); });
+    zoomOut.addEventListener('click', async () => { fitMode = 'manual'; scale = Math.max(0.2, scale / 1.2); await renderPage(); });
+    fitSel.addEventListener('change', async () => {
+      const v = fitSel.value;
+      if (v === 'auto') {
+        fitMode = 'page-width';
+      } else if (['page-width','100','150','200'].includes(v)) {
+        fitMode = v;
+        if (!isNaN(+v)) scale = +v / 100;
+      } else {
+        fitMode = 'manual';
+      }
+      await renderPage();
+    });
+    window.addEventListener('resize', () => { if (pdfDoc && fitMode !== 'manual') renderPage(); });
+
+    loadDocument();
+  </script>
+</head>
+<body></body>
+</html>
