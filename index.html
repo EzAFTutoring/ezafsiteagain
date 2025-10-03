@@ -13,6 +13,8 @@
     .pdf-picker select { min-width:260px; padding:8px 10px; border:1px solid #dcdce8; border-radius:6px; }
     .pdf-picker a { padding:8px 12px; border:1px solid #dcdce8; border-radius:6px; text-decoration:none; }
     .notice { text-align:center; color:#a53; margin:.5rem 0 0; font-size:.95rem; }
+    .credit { text-align:center; font-size:.9rem; color:#555; margin-top:1rem; }
+    footer { text-align:center; padding:2rem 1rem; background:#f4f4fb; color:#555; font-size:.9rem; }
   </style>
 </head>
 <body>
@@ -66,9 +68,7 @@
       <!-- Picker -->
       <div class="pdf-picker">
         <label for="pdfSelect"><strong>Select a file:</strong></label>
-        <select id="pdfSelect" aria-label="Select a PDF to view">
-          <!-- populated by script -->
-        </select>
+        <select id="pdfSelect" aria-label="Select a PDF to view"></select>
         <a id="openNewTab" class="view-link" target="_blank" rel="noopener">Open in new tab</a>
         <small id="fileNote" style="opacity:.8"></small>
       </div>
@@ -79,11 +79,16 @@
         <iframe
           id="pdfFrame"
           class="pdf-frame"
-          src="pdfjs/web/viewer.html?v=4&file=%2Fpdfs%2FLesson%201%20-%20Estimating%20with%20Finite%20Sums.pdf#zoom=page-width"
+          src="pdfjs/web/viewer.html?v=4&file=%2Fpdfs%2FIntroduction%20to%20Integrals.pdf#zoom=page-width"
           title="EZAF PDF Viewer"
           allowfullscreen>
         </iframe>
       </div>
+
+      <!-- Credit -->
+      <p class="credit">
+        Lesson notes provided by <strong>Michael Pitocco</strong>. Used with permission.
+      </p>
     </section>
 
     <!-- CONTACT -->
@@ -96,10 +101,11 @@
   </main>
 
   <footer>
-    <p>E.Z.A.F. Tutoring — Personalized math &amp; science help for Grades&nbsp;9–12. Learning made simple.</p>
+    <p>E.Z.A.F. Tutoring — Personalized math &amp; science help for Grades 9–12. Learning made simple.</p>
+    <p>Lesson materials © <em>Michael Pitocco</em>.</p>
   </footer>
 
-  <!-- Manifest loader + robust picker -->
+  <!-- Manifest loader -->
   <script>
     (function(){
       const select = document.getElementById('pdfSelect');
@@ -108,25 +114,18 @@
       const note   = document.getElementById('fileNote');
       const alert  = document.getElementById('pickerNotice');
 
-      // Build an encoded absolute path without breaking slashes.
       function encodeAbs(path) {
-        // Normalize to absolute
         if (!path.startsWith('/')) path = '/' + path.replace(/^\/+/, '');
-        // Encode but keep / as %2F (the viewer expects a URL-encoded absolute path)
         return encodeURIComponent(path).replace(/%2F/g, '%2F');
       }
-
       function setViewer(path) {
-        // Guard against empty/undefined
-        if (!path || typeof path !== 'string') return;
+        if (!path) return;
         const encoded = encodeAbs(path);
         const viewerUrl = `pdfjs/web/viewer.html?v=4&file=${encoded}#zoom=page-width`;
-        frame.src = viewerUrl;          // load inside iframe
-        open.href = path;               // raw link for new tab
-        note.textContent = path;        // small text for clarity
+        frame.src = viewerUrl;
+        open.href = path;
+        note.textContent = path;
       }
-
-      // Populate the dropdown safely
       function populate(items) {
         select.innerHTML = '';
         items.forEach(item => {
@@ -136,42 +135,26 @@
           select.appendChild(opt);
         });
       }
-
-      // Fallback single item (your Lesson 1 file)
-      function fallbackToLesson1(reason) {
-        const fallback = '/pdfs/Lesson 1 - Estimating with Finite Sums.pdf';
+      function fallback(reason) {
+        const fallback = '/pdfs/Introduction to Integrals.pdf';
         select.innerHTML = '';
         const opt = document.createElement('option');
-        opt.value = fallback; opt.textContent = 'Lesson 1 - Estimating with Finite Sums';
+        opt.value = fallback; opt.textContent = 'Introduction to Integrals';
         select.appendChild(opt);
         setViewer(opt.value);
-        alert.textContent = reason || 'Showing fallback file because the manifest was missing or invalid.';
+        alert.textContent = reason || 'Showing fallback file because manifest was missing or invalid.';
         alert.style.display = 'block';
       }
-
-      // Load manifest fresh each time (avoid stale cache)
       fetch('/pdfs/manifest.json', { cache: 'no-store' })
-        .then(r => {
-          if (!r.ok) throw new Error('Manifest not found');
-          return r.json();
-        })
+        .then(r => { if (!r.ok) throw 0; return r.json(); })
         .then(data => {
           const items = (data && Array.isArray(data.items)) ? data.items.filter(Boolean) : [];
-          if (!items.length) { fallbackToLesson1('No items found in manifest.'); return; }
-
+          if (!items.length) { fallback('No items found in manifest.'); return; }
           populate(items);
           setViewer(select.value);
-
-          // Update viewer when selection changes
-          select.addEventListener('change', () => {
-            setViewer(select.value);
-            alert.style.display = 'none';
-          });
+          select.addEventListener('change', () => { setViewer(select.value); alert.style.display = 'none'; });
         })
-        .catch(() => {
-          // If fetch fails or JSON invalid
-          fallbackToLesson1('Could not load manifest.json.');
-        });
+        .catch(() => fallback('Could not load manifest.json.'));
     })();
   </script>
 </body>
