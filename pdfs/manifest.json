@@ -1,11 +1,8 @@
 {
   "items": [
     {
-      "title": "Literature Review",
-      "file": "/pdfs/Literature Review.pdf"
-    },
-    {
-      "title": Lesson 1 - Estimating with Finite Sums",
-      "file: /pdfs/ Lesson 1 - Estimating with Finite Sums.pdf"
+      "title": "Lesson 1 - Estimating with Finite Sums",
+      "file": "/pdfs/Lesson 1 - Estimating with Finite Sums.pdf"
+    }
   ]
 }
