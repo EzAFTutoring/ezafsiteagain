@@ -1,183 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>E.Z.A.F. Tutoring | Learning Made Simple</title>
-    <!-- Link to external stylesheet for colours, layouts and utilities -->
-    <link rel="stylesheet" href="style.css" />
-    <style>
-        /* Minimal inline fallbacks for fonts and colours to avoid FOIT/FOUC */
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                Helvetica, Arial, sans-serif;
-            color: #1b1c3e;
-            background-color: #f9f9fc;
-            line-height: 1.6;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E.Z.A.F. Tutoring | Learning Made Simple</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; color:#1b1c3e; line-height:1.6; background:#fff; }
+    .pdf-viewer-container { max-width:900px; margin:0 auto 3rem; border:1px solid #dcdce8; border-radius:8px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); }
+    .pdf-frame { width:100%; height:700px; border:none; }
+  </style>
 </head>
 <body>
-    <!-- Hero: full viewport banner with overlay and CTA -->
-    <header class="hero">
-        <div class="hero-content">
-            <h1>Learning&nbsp;Made&nbsp;Simple</h1>
-            <p>Personalised math &amp; science help for Grades&nbsp;9–12</p>
-            <a href="#contact" class="cta-button">Book Your Free Consultation</a>
-        </div>
-    </header>
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Learning&nbsp;Made&nbsp;Simple</h1>
+      <p>Personalized math &amp; science help for Grades&nbsp;9–12</p>
+      <a href="#contact" class="cta-button">Book Your Free Consultation</a>
+    </div>
+  </header>
 
-    <main>
-        <!-- About us -->
-        <section id="about" class="about-section">
-            <h2>About Us</h2>
-            <p>
-                E.Z.A.F. Tutoring provides one‑on‑one support in math and the sciences (chemistry,
-                biology and physics) for high school students. Every session is thoughtfully
-                prepared around the student’s needs — lessons are planned in advance and
-                students enjoy an extra 30 minutes of free response time to tackle any
-                schoolwork they find challenging. Our goal is to build confidence and ensure
-                deep understanding, not just memorisation.
-            </p>
-        </section>
+  <main>
+    <section id="about" class="about-section">
+      <h2>About Us</h2>
+      <p>E.Z.A.F. Tutoring provides one-on-one support in math and the sciences for high school students. Every session is thoughtfully prepared around the student’s needs.</p>
+    </section>
 
-        <!-- Services offered -->
-        <section id="services" class="services-section">
-            <h2>What We Offer</h2>
-            <div class="service-grid">
-                <div class="service-card">
-                    <h3>Custom Lessons</h3>
-                    <p>Lessons are designed specifically for each student, including an
-                        additional 30&nbsp;minutes of free responses for any schoolwork they don’t
-                        understand.</p>
-                </div>
-                <div class="service-card">
-                    <h3>Flexible Sessions</h3>
-                    <p>Need more practice on tough problems? Schedule an entire session of free
-                        responses or tailor the structure to fit your learning style.</p>
-                </div>
-                <div class="service-card">
-                    <h3>Free Consultations</h3>
-                    <p>New students receive a free consultation to understand their goals and
-                        learning gaps, plus complimentary practice sheets to reinforce their
-                        skills.</p>
-                </div>
-            </div>
-        </section>
+    <section id="services" class="services-section">
+      <h2>What We Offer</h2>
+      <div class="service-grid">
+        <div class="service-card"><h3>Custom Lessons</h3><p>Tailored lessons with extra response time for schoolwork.</p></div>
+        <div class="service-card"><h3>Flexible Sessions</h3><p>Fine-tune structure or focus entirely on practice problems.</p></div>
+        <div class="service-card"><h3>Free Consultations</h3><p>Goal setting, gap analysis, and practice sheets included.</p></div>
+      </div>
+    </section>
 
-        <!-- Pricing details -->
-        <section id="pricing" class="pricing-section">
-            <h2>Affordable Pricing</h2>
-            <div class="pricing-card">
-                <h3>$30&nbsp;per&nbsp;session</h3>
-                <p>
-                    Each session includes 1.5&nbsp;hours of instruction and lesson planning.
-                    Enjoy personalised help at an accessible rate.
-                </p>
-                <p>100&nbsp;% satisfaction or your money back.</p>
-            </div>
-        </section>
+    <section id="pricing" class="pricing-section">
+      <h2>Affordable Pricing</h2>
+      <div class="pricing-card">
+        <h3>$30&nbsp;per&nbsp;session</h3>
+        <p>1.5 hours of instruction and lesson planning.</p>
+        <p>100% satisfaction or your money back.</p>
+      </div>
+    </section>
 
-        <!-- Resources with PDF reader -->
-        <section id="resources" class="about-section">
-            <h2>Resources &amp; Materials</h2>
-            <p style="text-align:center; max-width:700px; margin:0 auto 1rem;">
-                Choose a PDF below. New uploads appear here once you update the list.
-            </p>
-            <!-- PDF picker: populated from manifest.json -->
-            <div class="pdf-picker">
-                <label for="pdfSelect"><strong>Select a file:</strong></label>
-                <select id="pdfSelect" aria-label="Select a PDF to view"></select>
-                <a id="openNewTab" class="view-link" target="_blank" rel="noopener">Open in new tab</a>
-                <small id="fileNote"></small>
-            </div>
-            <!-- Embedded PDF viewer -->
-            <div class="pdf-viewer-container">
-                <iframe
-                    id="pdfFrame"
-                    class="pdf-frame"
-                    src="pdfjs/web/viewer.html?file=%2Fpdfs%2FLiterature%20Review.pdf#zoom=page-width"
-                    title="EZAF PDF Viewer"
-                    allowfullscreen
-                ></iframe>
-            </div>
-        </section>
+    <section id="resources" class="about-section">
+      <h2>Resources & Materials</h2>
+      <p style="text-align:center;max-width:700px;margin:0 auto 1rem;">Pick a PDF from the list; it will open below.</p>
 
-        <!-- Contact information -->
-        <section id="contact" class="contact-section">
-            <h2>Get in Touch</h2>
-            <p>Call or text <a href="tel:+19055147522">(905)&nbsp;514-7522</a> to
-                schedule your first free session.</p>
-            <p>Located in Milton, Ontario. Serving students in person and online.</p>
-            <p>First session is free for new students.</p>
-        </section>
-    </main>
+      <div class="pdf-picker" style="display:flex;gap:12px;justify-content:center;align-items:center;margin:0 auto 1.5rem;max-width:900px;flex-wrap:wrap;">
+        <label for="pdfSelect"><strong>Select a file:</strong></label>
+        <select id="pdfSelect" style="min-width:260px;padding:8px 10px;border:1px solid #dcdce8;border-radius:6px;">
+        </select>
+        <a id="openNewTab" class="view-link" target="_blank" rel="noopener" style="padding:8px 12px;border:1px solid #dcdce8;border-radius:6px;text-decoration:none;">Open in new tab</a>
+        <small id="fileNote" style="opacity:.8"></small>
+      </div>
 
-    <!-- Site footer -->
-    <footer>
-        <p>
-            E.Z.A.F. Tutoring — Personalised math &amp; science help for Grades&nbsp;9–12.
-            Learning made simple.
-        </p>
-    </footer>
+      <div class="pdf-viewer-container">
+        <iframe
+          id="pdfFrame"
+          class="pdf-frame"
+          src="pdfjs/web/viewer.html?v=3&file=%2Fpdfs%2FLesson%201%20-%20Estimating%20with%20Finite%20Sums.pdf#zoom=page-width"
+          title="EZAF PDF Viewer"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </section>
 
-    <!-- Script to load PDFs and update viewer -->
-    <script>
-        (function () {
-            const selectEl = document.getElementById('pdfSelect');
-            const frameEl = document.getElementById('pdfFrame');
-            const openLink = document.getElementById('openNewTab');
-            const noteEl = document.getElementById('fileNote');
+    <section id="contact" class="contact-section">
+      <h2>Get in Touch</h2>
+      <p>Call or text <a href="tel:+19055147522">(905)&nbsp;514-7522</a> to schedule your first free session.</p>
+      <p>Located in Milton, Ontario. Serving students in person and online.</p>
+      <p>First session is free for new students.</p>
+    </section>
+  </main>
 
-            // Utility: ensure path begins with slash and is URL‑encoded for viewer
-            function encodePath(path) {
-                let clean = path.startsWith('/') ? path : '/' + path.replace(/^\/+/, '');
-                // Encode URI component and preserve slashes
-                return encodeURIComponent(clean).replace(/%2F/g, '%2F');
-            }
+  <footer>
+    <p>E.Z.A.F. Tutoring — Personalized math &amp; science help for Grades&nbsp;9–12. Learning made simple.</p>
+  </footer>
 
-            // Update iframe and link based on selected value
-            function updateViewer(file) {
-                const encoded = encodePath(file);
-                frameEl.src = `pdfjs/web/viewer.html?file=${encoded}#zoom=page-width`;
-                openLink.href = file;
-                noteEl.textContent = file;
-            }
+  <!-- dynamic manifest loader (optional) -->
+  <script>
+    (function(){
+      const select = document.getElementById('pdfSelect');
+      const frame  = document.getElementById('pdfFrame');
+      const open   = document.getElementById('openNewTab');
+      const note   = document.getElementById('fileNote');
 
-            // Attempt to fetch manifest.json to populate dropdown
-            async function loadManifest() {
-                try {
-                    const res = await fetch('/pdfs/manifest.json', { cache: 'no-store' });
-                    if (!res.ok) throw new Error('manifest missing');
-                    const data = await res.json();
-                    if (!Array.isArray(data.items) || data.items.length === 0) throw new Error('no items');
-                    selectEl.innerHTML = '';
-                    data.items.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.file;
-                        option.textContent = item.title || item.file.split('/').pop();
-                        selectEl.appendChild(option);
-                    });
-                    // Set default
-                    updateViewer(selectEl.value);
-                } catch (err) {
-                    // Fallback to default file when manifest is missing or empty
-                    selectEl.innerHTML = '';
-                    const option = document.createElement('option');
-                    option.value = '/pdfs/Literature Review.pdf';
-                    option.textContent = 'Literature Review.pdf';
-                    selectEl.appendChild(option);
-                    updateViewer(option.value);
-                }
-            }
+      function encodeAbs(path){ if(!path.startsWith('/')) path='/'+path.replace(/^\\/+/,''); return encodeURIComponent(path).replace(/%2F/g,'%2F'); }
+      function setViewer(path){
+        const encoded = encodeAbs(path);
+        const url = `pdfjs/web/viewer.html?v=3&file=${encoded}#zoom=page-width`;
+        frame.src = url; open.href = path; note.textContent = path;
+      }
 
-            // Change handler
-            selectEl.addEventListener('change', () => updateViewer(selectEl.value));
-
-            // Populate on load
-            loadManifest();
-        })();
-    </script>
+      fetch('/pdfs/manifest.json', { cache:'no-store' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          const items = Array.isArray(data.items) ? data.items : [];
+          if (!items.length) throw 0;
+          select.innerHTML = '';
+          items.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.file; opt.textContent = item.title || item.file.split('/').pop();
+            select.appendChild(opt);
+          });
+          setViewer(select.value);
+          select.addEventListener('change', () => setViewer(select.value));
+        })
+        .catch(() => {
+          // fallback to Lesson 1 if manifest missing
+          const fallback = '/pdfs/Lesson 1 - Estimating with Finite Sums.pdf';
+          select.innerHTML = '';
+          const opt = document.createElement('option');
+          opt.value = fallback; opt.textContent = 'Lesson 1 - Estimating with Finite Sums';
+          select.appendChild(opt);
+          setViewer(opt.value);
+        });
+    })();
+  </script>
 </body>
 </html>
