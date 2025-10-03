@@ -9,9 +9,14 @@
     body { margin:0; font-family: Arial, sans-serif; color:#1b1c3e; line-height:1.6; background:#fff; }
     .pdf-viewer-container { max-width:900px; margin:0 auto 3rem; border:1px solid #dcdce8; border-radius:8px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,.08); }
     .pdf-frame { width:100%; height:700px; border:none; }
+    .pdf-picker { display:flex; gap:12px; justify-content:center; align-items:center; margin:0 auto 1.5rem; max-width:900px; flex-wrap:wrap; }
+    .pdf-picker select { min-width:260px; padding:8px 10px; border:1px solid #dcdce8; border-radius:6px; }
+    .pdf-picker a { padding:8px 12px; border:1px solid #dcdce8; border-radius:6px; text-decoration:none; }
+    .notice { text-align:center; color:#a53; margin:.5rem 0 0; font-size:.95rem; }
   </style>
 </head>
 <body>
+  <!-- HERO -->
   <header class="hero">
     <div class="hero-content">
       <h1>Learning&nbsp;Made&nbsp;Simple</h1>
@@ -21,20 +26,27 @@
   </header>
 
   <main>
+    <!-- ABOUT -->
     <section id="about" class="about-section">
       <h2>About Us</h2>
-      <p>E.Z.A.F. Tutoring provides one-on-one support in math and the sciences for high school students. Every session is thoughtfully prepared around the student’s needs.</p>
+      <p>
+        E.Z.A.F. Tutoring provides one-on-one support in math and the sciences (chemistry, biology, and physics) for high school students.
+        Every session is thoughtfully prepared around the student’s needs—lessons are planned in advance and students enjoy additional response time
+        for schoolwork they find challenging.
+      </p>
     </section>
 
+    <!-- SERVICES -->
     <section id="services" class="services-section">
       <h2>What We Offer</h2>
       <div class="service-grid">
         <div class="service-card"><h3>Custom Lessons</h3><p>Tailored lessons with extra response time for schoolwork.</p></div>
-        <div class="service-card"><h3>Flexible Sessions</h3><p>Fine-tune structure or focus entirely on practice problems.</p></div>
+        <div class="service-card"><h3>Flexible Sessions</h3><p>Focus an entire session on free responses or tough problems.</p></div>
         <div class="service-card"><h3>Free Consultations</h3><p>Goal setting, gap analysis, and practice sheets included.</p></div>
       </div>
     </section>
 
+    <!-- PRICING -->
     <section id="pricing" class="pricing-section">
       <h2>Affordable Pricing</h2>
       <div class="pricing-card">
@@ -44,29 +56,37 @@
       </div>
     </section>
 
+    <!-- RESOURCES -->
     <section id="resources" class="about-section">
       <h2>Resources & Materials</h2>
-      <p style="text-align:center;max-width:700px;margin:0 auto 1rem;">Pick a PDF from the list; it will open below.</p>
+      <p style="text-align:center;max-width:700px;margin:0 auto 1rem;">
+        Choose a PDF below. It will load in the embedded viewer.
+      </p>
 
-      <div class="pdf-picker" style="display:flex;gap:12px;justify-content:center;align-items:center;margin:0 auto 1.5rem;max-width:900px;flex-wrap:wrap;">
+      <!-- Picker -->
+      <div class="pdf-picker">
         <label for="pdfSelect"><strong>Select a file:</strong></label>
-        <select id="pdfSelect" style="min-width:260px;padding:8px 10px;border:1px solid #dcdce8;border-radius:6px;">
+        <select id="pdfSelect" aria-label="Select a PDF to view">
+          <!-- populated by script -->
         </select>
-        <a id="openNewTab" class="view-link" target="_blank" rel="noopener" style="padding:8px 12px;border:1px solid #dcdce8;border-radius:6px;text-decoration:none;">Open in new tab</a>
+        <a id="openNewTab" class="view-link" target="_blank" rel="noopener">Open in new tab</a>
         <small id="fileNote" style="opacity:.8"></small>
       </div>
+      <div class="notice" id="pickerNotice" style="display:none;"></div>
 
+      <!-- Embedded Viewer -->
       <div class="pdf-viewer-container">
         <iframe
           id="pdfFrame"
           class="pdf-frame"
-          src="pdfjs/web/viewer.html?v=3&file=%2Fpdfs%2FLesson%201%20-%20Estimating%20with%20Finite%20Sums.pdf#zoom=page-width"
+          src="pdfjs/web/viewer.html?v=4&file=%2Fpdfs%2FLesson%201%20-%20Estimating%20with%20Finite%20Sums.pdf#zoom=page-width"
           title="EZAF PDF Viewer"
           allowfullscreen>
         </iframe>
       </div>
     </section>
 
+    <!-- CONTACT -->
     <section id="contact" class="contact-section">
       <h2>Get in Touch</h2>
       <p>Call or text <a href="tel:+19055147522">(905)&nbsp;514-7522</a> to schedule your first free session.</p>
@@ -79,43 +99,78 @@
     <p>E.Z.A.F. Tutoring — Personalized math &amp; science help for Grades&nbsp;9–12. Learning made simple.</p>
   </footer>
 
-  <!-- dynamic manifest loader (optional) -->
+  <!-- Manifest loader + robust picker -->
   <script>
     (function(){
       const select = document.getElementById('pdfSelect');
       const frame  = document.getElementById('pdfFrame');
       const open   = document.getElementById('openNewTab');
       const note   = document.getElementById('fileNote');
+      const alert  = document.getElementById('pickerNotice');
 
-      function encodeAbs(path){ if(!path.startsWith('/')) path='/'+path.replace(/^\\/+/,''); return encodeURIComponent(path).replace(/%2F/g,'%2F'); }
-      function setViewer(path){
-        const encoded = encodeAbs(path);
-        const url = `pdfjs/web/viewer.html?v=3&file=${encoded}#zoom=page-width`;
-        frame.src = url; open.href = path; note.textContent = path;
+      // Build an encoded absolute path without breaking slashes.
+      function encodeAbs(path) {
+        // Normalize to absolute
+        if (!path.startsWith('/')) path = '/' + path.replace(/^\/+/, '');
+        // Encode but keep / as %2F (the viewer expects a URL-encoded absolute path)
+        return encodeURIComponent(path).replace(/%2F/g, '%2F');
       }
 
-      fetch('/pdfs/manifest.json', { cache:'no-store' })
-        .then(r => r.ok ? r.json() : Promise.reject())
+      function setViewer(path) {
+        // Guard against empty/undefined
+        if (!path || typeof path !== 'string') return;
+        const encoded = encodeAbs(path);
+        const viewerUrl = `pdfjs/web/viewer.html?v=4&file=${encoded}#zoom=page-width`;
+        frame.src = viewerUrl;          // load inside iframe
+        open.href = path;               // raw link for new tab
+        note.textContent = path;        // small text for clarity
+      }
+
+      // Populate the dropdown safely
+      function populate(items) {
+        select.innerHTML = '';
+        items.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.file;
+          opt.textContent = item.title || (item.file || '').split('/').pop();
+          select.appendChild(opt);
+        });
+      }
+
+      // Fallback single item (your Lesson 1 file)
+      function fallbackToLesson1(reason) {
+        const fallback = '/pdfs/Lesson 1 - Estimating with Finite Sums.pdf';
+        select.innerHTML = '';
+        const opt = document.createElement('option');
+        opt.value = fallback; opt.textContent = 'Lesson 1 - Estimating with Finite Sums';
+        select.appendChild(opt);
+        setViewer(opt.value);
+        alert.textContent = reason || 'Showing fallback file because the manifest was missing or invalid.';
+        alert.style.display = 'block';
+      }
+
+      // Load manifest fresh each time (avoid stale cache)
+      fetch('/pdfs/manifest.json', { cache: 'no-store' })
+        .then(r => {
+          if (!r.ok) throw new Error('Manifest not found');
+          return r.json();
+        })
         .then(data => {
-          const items = Array.isArray(data.items) ? data.items : [];
-          if (!items.length) throw 0;
-          select.innerHTML = '';
-          items.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.file; opt.textContent = item.title || item.file.split('/').pop();
-            select.appendChild(opt);
-          });
+          const items = (data && Array.isArray(data.items)) ? data.items.filter(Boolean) : [];
+          if (!items.length) { fallbackToLesson1('No items found in manifest.'); return; }
+
+          populate(items);
           setViewer(select.value);
-          select.addEventListener('change', () => setViewer(select.value));
+
+          // Update viewer when selection changes
+          select.addEventListener('change', () => {
+            setViewer(select.value);
+            alert.style.display = 'none';
+          });
         })
         .catch(() => {
-          // fallback to Lesson 1 if manifest missing
-          const fallback = '/pdfs/Lesson 1 - Estimating with Finite Sums.pdf';
-          select.innerHTML = '';
-          const opt = document.createElement('option');
-          opt.value = fallback; opt.textContent = 'Lesson 1 - Estimating with Finite Sums';
-          select.appendChild(opt);
-          setViewer(opt.value);
+          // If fetch fails or JSON invalid
+          fallbackToLesson1('Could not load manifest.json.');
         });
     })();
   </script>
