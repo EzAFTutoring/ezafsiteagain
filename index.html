@@ -49,6 +49,16 @@
     footer{
       color:var(--muted); font-size:12.5px; text-align:center; padding:18px 0 8px;
     }
+
+    /* CREDIT */
+    footer::after{
+      content:"Math Lessons used by permission. Credit to Mr. Pitocco.";
+      display:block;
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
     @media (max-width:640px){
       .wrap{padding:16px}
       iframe{height:72vh}
@@ -89,7 +99,6 @@
   </div>
 
   <script>
-    // Minimal client for manifest + viewer wiring.
     (function () {
       const select = document.getElementById('pdfSelect');
       const iframe = document.getElementById('viewer');
@@ -98,28 +107,19 @@
       const warn = document.getElementById('warn');
       const currentPath = document.getElementById('currentPath');
 
-      // Convert a site-relative path to an encoded absolute path for PDF.js ?file=
       function toEncodedAbs(path) {
         if (!path) return "";
-        // normalize to absolute
         if (!path.startsWith('/')) path = '/' + path.replace(/^\/+/, '');
-        // encode but preserve slashes as %2F (PDF.js viewer expects URL-encoded path)
         return encodeURIComponent(path).replace(/%2F/g, '%2F');
       }
 
       function setViewer(path) {
         if (!path) return;
-
-        // cache-bust the viewer to avoid Netlify/CDN stale cache when you update viewer.html
         const encoded = toEncodedAbs(path);
-        const viewerUrl = `pdfjs/web/viewer.html?v=5&file=${encoded}#zoom=page-width`;
-        iframe.src = viewerUrl;
-
+        iframe.src = `pdfjs/web/viewer.html?v=5&file=${encoded}#zoom=page-width`;
         openBtn.href = path;
         downloadBtn.href = path;
-        const fileName = path.split('/').pop();
-        downloadBtn.download = fileName || 'file.pdf';
-
+        downloadBtn.download = path.split('/').pop() || 'file.pdf';
         currentPath.textContent = path;
       }
 
@@ -128,46 +128,29 @@
         items.forEach(item => {
           const opt = document.createElement('option');
           opt.value = item.file;
-          opt.textContent = item.title || (item.file || '').split('/').pop();
+          opt.textContent = item.title || item.file.split('/').pop();
           select.appendChild(opt);
         });
       }
 
       function fallback(reason) {
         warn.style.display = 'block';
-        warn.textContent = reason || 'Could not load manifest.json. Add one at /pdfs/manifest.json.';
-        // Try a sensible default if it exists; otherwise show empty list
-        const defaultPath = '/pdfs/Introduction to Integrals.pdf';
-        select.innerHTML = '';
-        const opt = document.createElement('option');
-        opt.value = defaultPath;
-        opt.textContent = defaultPath.split('/').pop();
-        select.appendChild(opt);
-        setViewer(defaultPath);
+        warn.textContent = reason || 'Could not load manifest.json.';
       }
 
-      // Load manifest with no-store to avoid stale caching
       fetch('/pdfs/manifest.json', { cache: 'no-store' })
         .then(r => {
-          if (!r.ok) throw new Error('Manifest not found');
+          if (!r.ok) throw new Error();
           return r.json();
         })
         .then(data => {
-          const items = (data && Array.isArray(data.items)) ? data.items.filter(Boolean) : [];
-          if (!items.length) {
-            fallback('No items found in /pdfs/manifest.json. Add entries like { "title": "My Doc", "file": "/pdfs/mydoc.pdf" }.');
-            return;
-          }
+          const items = Array.isArray(data.items) ? data.items : [];
+          if (!items.length) return fallback('No PDFs listed in manifest.');
           populate(items);
           setViewer(select.value);
-          select.addEventListener('change', () => {
-            setViewer(select.value);
-            warn.style.display = 'none';
-          });
+          select.addEventListener('change', () => setViewer(select.value));
         })
-        .catch(() => {
-          fallback('Could not load /pdfs/manifest.json.');
-        });
+        .catch(() => fallback('Could not load /pdfs/manifest.json.'));
     })();
   </script>
 </body>
